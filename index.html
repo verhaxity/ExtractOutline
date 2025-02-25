@@ -1,0 +1,31 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Image Outline Extractor</title>
+    <link rel="stylesheet" href="main.css">
+</head>
+<body>
+    <h1 class="heading1">Image Outline Extractor</h1>
+    
+    <div class="button-container">
+        <input type="file" id="imageInput" accept="image/*" style="display: none;">
+        <button id="uploadBtn" class="buttons">Upload Image</button>
+        <button id="resetBtn" class="buttons">Reset</button>
+        <button id="downloadBtn" class="buttons">Download Outline</button>
+    </div>
+
+    <div class="canvas-container">
+        <div class="canvas-box">
+            <div class="canvas-label">Original Image</div>
+            <canvas id="originalCanvas"></canvas>
+        </div>
+        <div class="canvas-box">
+            <div class="canvas-label">Outline</div>
+            <canvas id="outlineCanvas"></canvas>
+        </div>
+    </div>
+    <script src="main.js"></script>
+</body>
+</html>
