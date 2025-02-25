@@ -21,6 +21,7 @@ body {
 }
 
 .buttons {
+    border-radius: 10px;
     font-family: 'Coders-crux',sans-serif;
     font-size: clamp(16px, 3vw, 25px);
 }
@@ -36,9 +37,17 @@ body {
 }
 
 #uploadBtn, #resetBtn, #downloadBtn {
-    padding: clamp(8px, 2vw, 10px) clamp(15px, 3vw, 20px);
-    font-size: clamp(14px, 2.5vw, 16px);
-    min-width: 120px;
+    background-color: #333;
+    color: white;
+    border: none;
+    padding: 10px 20px;
+    cursor: pointer;
+    font-family: 'Coders-crux', sans-serif;
+    font-size: 16px;
+}
+
+#uploadBtn:hover, #resetBtn:hover, #downloadBtn:hover {
+    background-color: #444;
 }
 
 .canvas-container {
@@ -97,16 +106,13 @@ canvas {
     }
 
     .button-container {
-        flex-direction: column;
         gap: 8px;
         padding: 5px;
     }
 
     #uploadBtn, #resetBtn, #downloadBtn {
-        width: 100%;
-        max-width: none;
-        padding: 12px;
-        font-size: 16px;
+        padding: 10px 15px;
+        font-size: 14px;
     }
 
     .canvas-label {
