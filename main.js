@@ -7,7 +7,6 @@ const originalCanvas = document.getElementById('originalCanvas');
 const outlineCanvas = document.getElementById('outlineCanvas');
 const originalCtx = originalCanvas.getContext('2d');
 const outlineCtx = outlineCanvas.getContext('2d');
-const loadingOverlay = document.querySelector('.loading-overlay');
 
 // Hide buttons initially
 resetBtn.style.display = 'none';
@@ -15,110 +14,60 @@ downloadBtn.style.display = 'none';
 
 // Set initial canvas size
 function setInitialCanvasSize() {
-    // Make initial canvas size more suitable for mobile
-    const containerWidth = Math.min(500, window.innerWidth - 20); // 20px for padding
-    const containerHeight = Math.min(300, window.innerHeight * 0.3);
-    
-    // Set both canvases to the same size
-    [originalCanvas, outlineCanvas].forEach(canvas => {
-        canvas.width = containerWidth;
-        canvas.height = containerHeight;
-        
-        const ctx = canvas.getContext('2d');
-        ctx.fillStyle = '#f5f5f5';
-        ctx.fillRect(0, 0, containerWidth, containerHeight);
-    });
-}
+    const width = 500;
+    const height = 300;
+    originalCanvas.width = width;
+    originalCanvas.height = height;
+    outlineCanvas.width = width;
+    outlineCanvas.height = height;
 
-// Create the loading animation timeline
-const loadingAnimation = gsap.timeline({ paused: true })
-    .from('.loading-container', {
-        y: 30,
-        opacity: 0,
-        duration: 0.5
-    })
-    .to('.loading-circle', {
-        rotation: 360,
-        duration: 1,
-        ease: 'none',
-        repeat: -1
-    }, 0);
-
-// Function to show loading
-function showLoading() {
-    loadingOverlay.style.display = 'flex';
-    loadingAnimation.play();
-}
-
-// Function to hide loading
-function hideLoading() {
-    loadingAnimation.pause();
-    gsap.to(loadingOverlay, {
-        opacity: 0,
-        duration: 0.3,
-        onComplete: () => {
-            loadingOverlay.style.display = 'none';
-            loadingOverlay.style.opacity = 1;
-        }
-    });
+    // Fill with background color
+    originalCtx.fillStyle = '#f5f5f5';
+    originalCtx.fillRect(0, 0, width, height);
+    outlineCtx.fillStyle = '#f5f5f5';
+    outlineCtx.fillRect(0, 0, width, height);
 }
 
 // Function to process image
 function processImage(img) {
-    // Calculate aspect ratio
-    const aspectRatio = img.width / img.height;
-    
-    // Set maximum dimensions
-    let maxWidth = Math.min(500, window.innerWidth - 20);
-    let maxHeight = window.innerHeight * 0.4;
-    
-    // Calculate new dimensions maintaining aspect ratio
-    let newWidth = maxWidth;
-    let newHeight = newWidth / aspectRatio;
-    
-    if (newHeight > maxHeight) {
-        newHeight = maxHeight;
-        newWidth = newHeight * aspectRatio;
-    }
-    
-    // Set canvas dimensions
-    [originalCanvas, outlineCanvas].forEach(canvas => {
-        canvas.width = newWidth;
-        canvas.height = newHeight;
-    });
+    // Set canvas dimensions to match image
+    originalCanvas.width = img.width;
+    originalCanvas.height = img.height;
+    outlineCanvas.width = img.width;
+    outlineCanvas.height = img.height;
 
     // Draw original image
-    originalCtx.drawImage(img, 0, 0, newWidth, newHeight);
+    originalCtx.drawImage(img, 0, 0);
 
     // Get image data
-    const imageData = originalCtx.getImageData(0, 0, newWidth, newHeight);
+    const imageData = originalCtx.getImageData(0, 0, img.width, img.height);
     const data = imageData.data;
 
     // Create new ImageData for outline
-    const outlineImageData = new ImageData(newWidth, newHeight);
+    const outlineImageData = new ImageData(img.width, img.height);
     const outlineData = outlineImageData.data;
 
     // Edge detection
-    for (let y = 1; y < newHeight - 1; y++) {
-        for (let x = 1; x < newWidth - 1; x++) {
-            const idx = (y * newWidth + x) * 4;
+    for (let y = 1; y < img.height - 1; y++) {
+        for (let x = 1; x < img.width - 1; x++) {
+            const idx = (y * img.width + x) * 4;
 
             // Sobel operator
             const gx = 
-                -data[idx - 4 - newWidth * 4] +
-                data[idx + 4 - newWidth * 4] +
+                -data[idx - 4 - img.width * 4] +
+                data[idx + 4 - img.width * 4] +
                 -2 * data[idx - 4] +
                 2 * data[idx + 4] +
-                -data[idx - 4 + newWidth * 4] +
-                data[idx + 4 + newWidth * 4];
+                -data[idx - 4 + img.width * 4] +
+                data[idx + 4 + img.width * 4];
 
             const gy = 
-                -data[idx - newWidth * 4 - 4] +
-                -2 * data[idx - newWidth * 4] +
-                -data[idx - newWidth * 4 + 4] +
-                data[idx + newWidth * 4 - 4] +
-                2 * data[idx + newWidth * 4] +
-                data[idx + newWidth * 4 + 4];
+                -data[idx - img.width * 4 - 4] +
+                -2 * data[idx - img.width * 4] +
+                -data[idx - img.width * 4 + 4] +
+                data[idx + img.width * 4 - 4] +
+                2 * data[idx + img.width * 4] +
+                data[idx + img.width * 4 + 4];
 
             const magnitude = Math.sqrt(gx * gx + gy * gy);
             const threshold = 50;
@@ -131,13 +80,8 @@ function processImage(img) {
         }
     }
 
-    // Draw outline and hide loading animation
+    // Draw outline
     outlineCtx.putImageData(outlineImageData, 0, 0);
-    hideLoading(); // Hide loading after outline is drawn
-    
-    // Show buttons
-    resetBtn.style.display = 'inline-block';
-    downloadBtn.style.display = 'inline-block';
 }
 
 // Event Listeners
@@ -148,12 +92,13 @@ uploadBtn.addEventListener('click', () => {
 imageInput.addEventListener('change', (e) => {
     const file = e.target.files[0];
     if (file) {
-        showLoading(); // Show loading animation
         const reader = new FileReader();
         reader.onload = function(event) {
             const img = new Image();
             img.onload = function() {
                 processImage(img);
+                resetBtn.style.display = 'inline-block';
+                downloadBtn.style.display = 'inline-block';
             };
             img.src = event.target.result;
         };
@@ -196,10 +141,3 @@ if (themeToggle) {
         document.body.setAttribute('data-theme', newTheme);
     });
 }
-
-// Add window resize handler
-window.addEventListener('resize', () => {
-    if (!imageInput.files.length) {  // Only resize if no image is uploaded
-        setInitialCanvasSize();
-    }
-});
