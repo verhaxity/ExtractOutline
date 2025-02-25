@@ -31,7 +31,7 @@ ExtractOutline is a lightweight web-based tool that processes an input image and
 ### Running Locally
 1. Clone the repository:
    ```bash
-   git clone https://github.com/yourusername/ExtractOutline.git
+   git clone https://github.com/verhaxity/ExtractOutline.git
    cd ExtractOutline
    ```
 2. Open `index.html` in a web browser.
