@@ -14,30 +14,47 @@ downloadBtn.style.display = 'none';
 
 // Set initial canvas size
 function setInitialCanvasSize() {
-    const width = 500;
-    const height = 300;
-    originalCanvas.width = width;
-    originalCanvas.height = height;
-    outlineCanvas.width = width;
-    outlineCanvas.height = height;
-
-    // Fill with background color
-    originalCtx.fillStyle = '#f5f5f5';
-    originalCtx.fillRect(0, 0, width, height);
-    outlineCtx.fillStyle = '#f5f5f5';
-    outlineCtx.fillRect(0, 0, width, height);
+    // Make initial canvas size more suitable for mobile
+    const containerWidth = Math.min(500, window.innerWidth - 20); // 20px for padding
+    const containerHeight = Math.min(300, window.innerHeight * 0.3);
+    
+    // Set both canvases to the same size
+    [originalCanvas, outlineCanvas].forEach(canvas => {
+        canvas.width = containerWidth;
+        canvas.height = containerHeight;
+        
+        const ctx = canvas.getContext('2d');
+        ctx.fillStyle = '#f5f5f5';
+        ctx.fillRect(0, 0, containerWidth, containerHeight);
+    });
 }
 
 // Function to process image
 function processImage(img) {
-    // Set canvas dimensions to match image
-    originalCanvas.width = img.width;
-    originalCanvas.height = img.height;
-    outlineCanvas.width = img.width;
-    outlineCanvas.height = img.height;
+    // Calculate aspect ratio
+    const aspectRatio = img.width / img.height;
+    
+    // Set maximum dimensions
+    let maxWidth = Math.min(500, window.innerWidth - 20);
+    let maxHeight = window.innerHeight * 0.4;
+    
+    // Calculate new dimensions maintaining aspect ratio
+    let newWidth = maxWidth;
+    let newHeight = newWidth / aspectRatio;
+    
+    if (newHeight > maxHeight) {
+        newHeight = maxHeight;
+        newWidth = newHeight * aspectRatio;
+    }
+    
+    // Set canvas dimensions
+    [originalCanvas, outlineCanvas].forEach(canvas => {
+        canvas.width = newWidth;
+        canvas.height = newHeight;
+    });
 
-    // Draw original image
-    originalCtx.drawImage(img, 0, 0);
+    // Draw and process image
+    originalCtx.drawImage(img, 0, 0, newWidth, newHeight);
 
     // Get image data
     const imageData = originalCtx.getImageData(0, 0, img.width, img.height);
@@ -141,3 +158,10 @@ if (themeToggle) {
         document.body.setAttribute('data-theme', newTheme);
     });
 }
+
+// Add window resize handler
+window.addEventListener('resize', () => {
+    if (!imageInput.files.length) {  // Only resize if no image is uploaded
+        setInitialCanvasSize();
+    }
+});
