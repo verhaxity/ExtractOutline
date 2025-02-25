@@ -4,11 +4,11 @@
 ExtractOutline is a lightweight web-based tool that processes an input image and returns an extracted outline of objects in the image. It is designed for artists, designers, and developers who need quick and clean outlines for their projects.
 
 ## Features
-- 🖼️ **Upload an image** and generate an outline instantly.
-- ✨ **Edge detection** using a Sobel operator in JavaScript.
-- 🎨 **Canvas-based image processing** for real-time previews.
-- 🎭 **Dark & Light theme support**.
-- ⚡ **Fast and efficient processing** using pure JavaScript.
+- ->  **Upload an image** and generate an outline instantly.
+- ->  **Edge detection** using a Sobel operator in JavaScript.
+- ->  **Canvas-based image processing** for real-time previews.
+- ->  **Dark & Light theme support**.
+- ->  **Fast and efficient processing** using pure JavaScript.
 
 ## Tech Stack
 - **Frontend:** HTML, CSS (Custom styling, `@font-face` integration)
