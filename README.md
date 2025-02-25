@@ -1,7 +1,7 @@
 # ExtractOutline - Image Outline Extraction Tool
 
 ## Overview
-ExtractOutline is a lightweight web-based tool that processes an input image and returns an extracted outline of objects in the image. It is designed for artists, designers, and developers who need quick and clean outlines for their projects.
+ExtractOutline is a lightweight web-based tool that processes an input image and returns a dithered extracted outline of objects in the image. It is designed for artists, designers, and developers who need quick and clean outlines for their projects.
 
 
 ![ExtractOutline-preview](https://github.com/user-attachments/assets/965e0da6-21cb-4bb7-946a-5719311c2bca)
