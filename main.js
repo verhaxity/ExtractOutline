@@ -7,6 +7,7 @@ const originalCanvas = document.getElementById('originalCanvas');
 const outlineCanvas = document.getElementById('outlineCanvas');
 const originalCtx = originalCanvas.getContext('2d');
 const outlineCtx = outlineCanvas.getContext('2d');
+const loadingOverlay = document.querySelector('.loading-overlay');
 
 // Hide buttons initially
 resetBtn.style.display = 'none';
@@ -26,6 +27,39 @@ function setInitialCanvasSize() {
         const ctx = canvas.getContext('2d');
         ctx.fillStyle = '#f5f5f5';
         ctx.fillRect(0, 0, containerWidth, containerHeight);
+    });
+}
+
+// Create the loading animation timeline
+const loadingAnimation = gsap.timeline({ paused: true })
+    .from('.loading-container', {
+        y: 30,
+        opacity: 0,
+        duration: 0.5
+    })
+    .to('.loading-circle', {
+        rotation: 360,
+        duration: 1,
+        ease: 'none',
+        repeat: -1
+    }, 0);
+
+// Function to show loading
+function showLoading() {
+    loadingOverlay.style.display = 'flex';
+    loadingAnimation.play();
+}
+
+// Function to hide loading
+function hideLoading() {
+    loadingAnimation.pause();
+    gsap.to(loadingOverlay, {
+        opacity: 0,
+        duration: 0.3,
+        onComplete: () => {
+            loadingOverlay.style.display = 'none';
+            loadingOverlay.style.opacity = 1;
+        }
     });
 }
 
@@ -53,38 +87,38 @@ function processImage(img) {
         canvas.height = newHeight;
     });
 
-    // Draw and process image
+    // Draw original image
     originalCtx.drawImage(img, 0, 0, newWidth, newHeight);
 
     // Get image data
-    const imageData = originalCtx.getImageData(0, 0, img.width, img.height);
+    const imageData = originalCtx.getImageData(0, 0, newWidth, newHeight);
     const data = imageData.data;
 
     // Create new ImageData for outline
-    const outlineImageData = new ImageData(img.width, img.height);
+    const outlineImageData = new ImageData(newWidth, newHeight);
     const outlineData = outlineImageData.data;
 
     // Edge detection
-    for (let y = 1; y < img.height - 1; y++) {
-        for (let x = 1; x < img.width - 1; x++) {
-            const idx = (y * img.width + x) * 4;
+    for (let y = 1; y < newHeight - 1; y++) {
+        for (let x = 1; x < newWidth - 1; x++) {
+            const idx = (y * newWidth + x) * 4;
 
             // Sobel operator
             const gx = 
-                -data[idx - 4 - img.width * 4] +
-                data[idx + 4 - img.width * 4] +
+                -data[idx - 4 - newWidth * 4] +
+                data[idx + 4 - newWidth * 4] +
                 -2 * data[idx - 4] +
                 2 * data[idx + 4] +
-                -data[idx - 4 + img.width * 4] +
-                data[idx + 4 + img.width * 4];
+                -data[idx - 4 + newWidth * 4] +
+                data[idx + 4 + newWidth * 4];
 
             const gy = 
-                -data[idx - img.width * 4 - 4] +
-                -2 * data[idx - img.width * 4] +
-                -data[idx - img.width * 4 + 4] +
-                data[idx + img.width * 4 - 4] +
-                2 * data[idx + img.width * 4] +
-                data[idx + img.width * 4 + 4];
+                -data[idx - newWidth * 4 - 4] +
+                -2 * data[idx - newWidth * 4] +
+                -data[idx - newWidth * 4 + 4] +
+                data[idx + newWidth * 4 - 4] +
+                2 * data[idx + newWidth * 4] +
+                data[idx + newWidth * 4 + 4];
 
             const magnitude = Math.sqrt(gx * gx + gy * gy);
             const threshold = 50;
@@ -97,8 +131,13 @@ function processImage(img) {
         }
     }
 
-    // Draw outline
+    // Draw outline and hide loading animation
     outlineCtx.putImageData(outlineImageData, 0, 0);
+    hideLoading(); // Hide loading after outline is drawn
+    
+    // Show buttons
+    resetBtn.style.display = 'inline-block';
+    downloadBtn.style.display = 'inline-block';
 }
 
 // Event Listeners
@@ -109,13 +148,12 @@ uploadBtn.addEventListener('click', () => {
 imageInput.addEventListener('change', (e) => {
     const file = e.target.files[0];
     if (file) {
+        showLoading(); // Show loading animation
         const reader = new FileReader();
         reader.onload = function(event) {
             const img = new Image();
             img.onload = function() {
                 processImage(img);
-                resetBtn.style.display = 'inline-block';
-                downloadBtn.style.display = 'inline-block';
             };
             img.src = event.target.result;
         };
